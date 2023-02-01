@@ -1,4 +1,4 @@
-# ![Fish] (./logo.png)
+# ![Fish](./logo.png)
 
 # Fish
 Fish is a 2d rust game engine built on [wgpu](https://wgpu.rs). This is a simple game engine made for internal projects of KeyCap Studio :thumbsup:. Sadly, we will probably not make any in depth tutorials for the engine. We will also not post this onto crates.io. 
