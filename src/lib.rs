@@ -11,7 +11,7 @@ pub struct Engine {
     config: wgpu::SurfaceConfiguration,
     size: winit::dpi::PhysicalSize<u32>,
     pipelines: Vec<RenderPipeline>,
-    update: fn(),
+    update: fn(InputKey),
 }
 
 impl Engine {
@@ -118,6 +118,7 @@ impl Engine {
             queue,
             config,
             pipelines: vec![vertex_pipeline],
+            update: || {},
         }
     }
 }
@@ -139,4 +140,12 @@ impl EngineDescriptor {
             resizable: resizable.unwrap_or(false),
         }
     }
+}
+
+#[derive(Debug, Hash, PartialEq, Eq)]
+enum InputKey {
+    W,
+    A,
+    S,
+    D,
 }
