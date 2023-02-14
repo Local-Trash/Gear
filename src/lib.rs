@@ -1,8 +1,12 @@
+use std::collections::HashSet;
+
+use log::{error, info, log};
 use wgpu::{Backends, RenderPipeline};
-use winit::window::Window;
+use winit::window::{Window, WindowBuilder};
 
 pub mod math;
 pub mod sprite;
+mod shader;
 
 pub struct Engine {
     surface: wgpu::Surface,
@@ -22,18 +26,24 @@ impl Engine {
         let instance = wgpu::Instance::new(wgpu::InstanceDescriptor { backends: Backends::PRIMARY, ..Default::default() });
 
         let surface = unsafe {
-            instance.create_surface(&window).unwrap()
+            match instance.create_surface(&window) {
+                Ok(v) => {info!("Surface was created");v},
+                Err(e) => {log!(log::Level::Error, "Surface creation error: {:?}", e); std::process::exit(1)},
+            }
         };
 
-        let adapter = instance
+        let adapter = match instance
             .request_adapter(&wgpu::RequestAdapterOptions {
                 power_preference: wgpu::PowerPreference::default(),
                 compatible_surface: Some(&surface),
                 force_fallback_adapter: false,
             })
-            .await
-            .unwrap();
-        let (device, queue) = adapter
+            .await {
+                Some(v) => v,
+                None => {log!(log::Level::Error, "Request adapter error"); std::process::exit(1)},
+            };
+
+        let (device, queue) = match adapter
             .request_device(
                 &wgpu::DeviceDescriptor {
                     label: None,
@@ -48,8 +58,11 @@ impl Engine {
                 },
                 None, // Trace path
             )
-            .await
-        .unwrap();
+            .await {
+                Ok(d) => d,
+                Err(e) => {log!(log::Level::Error, "Device and Queue creation error: {:?}", e); std::process::exit(1);
+                },
+            };
 
         let config = wgpu::SurfaceConfiguration {
             usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
@@ -64,7 +77,7 @@ impl Engine {
 
         let shader = device.create_shader_module(wgpu::ShaderModuleDescriptor {
             label: Some("Shader"),
-            source: wgpu::ShaderSource::Wgsl(include_str!("shader.wgsl").into()),
+            source: wgpu::ShaderSource::Wgsl(String::from(shader::SHADER).into()),
         });
 
         let render_pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
@@ -111,6 +124,9 @@ impl Engine {
             multiview: None, // 5.
         });
 
+        log!(log::Level::Trace, "Engine was created");
+
+
         Self {
             size,
             surface,
@@ -118,8 +134,33 @@ impl Engine {
             queue,
             config,
             pipelines: vec![vertex_pipeline],
-            update: || {},
+            update: |_| {},
         }
+    }
+
+    fn run(&self, event_loop: winit::event_loop::EventLoop<()>) {
+
+        let mut inputMap: HashSet<u32> = HashSet::new();
+        event_loop.run(move |event, _, control_flow| {
+            *control_flow = winit::event_loop::ControlFlow::Poll;
+            match event {
+                winit::event::Event::WindowEvent {
+                    event: winit::event::WindowEvent::KeyboardInput { input, .. },
+                    ..
+                } => {
+                    if input.state == winit::event::ElementState::Pressed {
+                        inputMap.insert(input.scancode);
+                    } else {
+                        inputMap.remove(&input.scancode);
+                    }
+                },
+                winit::event::Event::WindowEvent { event: winit::event::WindowEvent::CloseRequested, .. } => *control_flow = winit::event_loop::ControlFlow::Exit,
+                winit::event::Event::MainEventsCleared => {
+                    (self.update)();
+                },
+                _ => {},
+            }
+        });
     }
 }
 
@@ -128,7 +169,6 @@ pub struct EngineDescriptor {
     dim: [u32; 2],
     icon: sprite::Sprite,
     resizable: bool,
-
 }
 
 impl EngineDescriptor {
@@ -144,8 +184,46 @@ impl EngineDescriptor {
 
 #[derive(Debug, Hash, PartialEq, Eq)]
 enum InputKey {
-    W,
     A,
-    S,
+    B,
+    C,
     D,
+    E,
+    F,
+    G,
+    H,
+    I,
+    J,
+    K,
+    L,
+    M,
+    N,
+    O,
+    P,
+    Q,
+    R,
+    S,
+    T,
+    U,
+    V,
+    W,
+    X,
+    Y,
+    Z,
+    One,
+    Two,
+    Three,
+    Four,
+    Five,
+    Six,
+    Seven,
+    Eight,
+    Nine,
+    Zero,
+    Space,
+    Enter,
+    Escape,
+    Backspace,
+    Tab,
+    Shift,
 }
