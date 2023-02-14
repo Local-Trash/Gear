@@ -2,11 +2,27 @@ use std::collections::HashSet;
 
 use log::{error, info, log};
 use wgpu::{Backends, RenderPipeline};
-use winit::window::{Window, WindowBuilder};
+use winit::{window::{Window, WindowBuilder, self}, event_loop::{EventLoop, self}, dpi::{Size, PhysicalSize}};
 
 pub mod math;
 pub mod sprite;
 mod shader;
+
+pub struct Context {
+    window: Window,
+    event_loop: EventLoop<()>,
+}
+
+impl Context {
+    fn new(desc: EngineDescriptor) -> Self {
+        let event_loop = EventLoop::new();
+        let window = WindowBuilder::new()
+            .with_resizable(false)
+            .with_inner_size(Size::Physical(PhysicalSize { width: desc.dim[0], height: desc.dim[1]}))
+            .with_title(desc.title)
+            .build(window_target);
+    }
+}
 
 pub struct Engine {
     surface: wgpu::Surface,
@@ -15,7 +31,7 @@ pub struct Engine {
     config: wgpu::SurfaceConfiguration,
     size: winit::dpi::PhysicalSize<u32>,
     pipelines: Vec<RenderPipeline>,
-    update: fn(InputKey),
+    update: fn(&HashSet<u32>),
 }
 
 impl Engine {
@@ -91,12 +107,12 @@ impl Engine {
             layout: Some(&render_pipeline_layout),
             vertex: wgpu::VertexState {
                 module: &shader,
-                entry_point: "vs_main", // 1.
+                entry_point: "vertex_main", // 1.
                 buffers: &[], // 2.
             },
             fragment: Some(wgpu::FragmentState { // 3.
                 module: &shader,
-                entry_point: "fs_main",
+                entry_point: "vertex_main",
                 targets: &[Some(wgpu::ColorTargetState { // 4.
                     format: config.format,
                     blend: Some(wgpu::BlendState::REPLACE),
@@ -134,13 +150,17 @@ impl Engine {
             queue,
             config,
             pipelines: vec![vertex_pipeline],
-            update: |_| {},
+            update: |input| print!("No Update Function: {:?}", input),
         }
     }
 
     fn run(&self, event_loop: winit::event_loop::EventLoop<()>) {
 
         let mut inputMap: HashSet<u32> = HashSet::new();
+        let mut updates: Vec<fn(&HashSet<u32>)> = Vec::new();
+
+        updates.push(self.update);
+
         event_loop.run(move |event, _, control_flow| {
             *control_flow = winit::event_loop::ControlFlow::Poll;
             match event {
@@ -156,7 +176,9 @@ impl Engine {
                 },
                 winit::event::Event::WindowEvent { event: winit::event::WindowEvent::CloseRequested, .. } => *control_flow = winit::event_loop::ControlFlow::Exit,
                 winit::event::Event::MainEventsCleared => {
-                    (self.update)();
+                    for fun in &updates {
+                        (fun)(&inputMap);
+                    }
                 },
                 _ => {},
             }
@@ -168,7 +190,6 @@ pub struct EngineDescriptor {
     title: String,
     dim: [u32; 2],
     icon: sprite::Sprite,
-    resizable: bool,
 }
 
 impl EngineDescriptor {
@@ -180,50 +201,4 @@ impl EngineDescriptor {
             resizable: resizable.unwrap_or(false),
         }
     }
-}
-
-#[derive(Debug, Hash, PartialEq, Eq)]
-enum InputKey {
-    A,
-    B,
-    C,
-    D,
-    E,
-    F,
-    G,
-    H,
-    I,
-    J,
-    K,
-    L,
-    M,
-    N,
-    O,
-    P,
-    Q,
-    R,
-    S,
-    T,
-    U,
-    V,
-    W,
-    X,
-    Y,
-    Z,
-    One,
-    Two,
-    Three,
-    Four,
-    Five,
-    Six,
-    Seven,
-    Eight,
-    Nine,
-    Zero,
-    Space,
-    Enter,
-    Escape,
-    Backspace,
-    Tab,
-    Shift,
 }
