@@ -1,26 +1,32 @@
-use std::collections::HashSet;
+#![allow(non_snake_case)]
+#![allow(dead_code)]
 
-use log::{error, info, log};
+use std::collections::HashSet;
+use log::{info, log};
 use wgpu::{Backends, RenderPipeline};
-use winit::{window::{Window, WindowBuilder, self}, event_loop::{EventLoop, self}, dpi::{Size, PhysicalSize}};
+use winit::{window::{Window, WindowBuilder}, event_loop::EventLoopBuilder, dpi::{Size, PhysicalSize}};
 
 pub mod math;
 pub mod sprite;
 mod shader;
 
 pub struct Context {
-    window: Window,
-    event_loop: EventLoop<()>,
+    pub window: WindowBuilder,
+    pub event_loop: EventLoopBuilder<()>,
 }
 
 impl Context {
-    fn new(desc: EngineDescriptor) -> Self {
-        let event_loop = EventLoop::new();
+    pub fn new(desc: EngineDescriptor) -> Self {
+        let event_loop = EventLoopBuilder::new();
         let window = WindowBuilder::new()
             .with_resizable(false)
             .with_inner_size(Size::Physical(PhysicalSize { width: desc.dim[0], height: desc.dim[1]}))
-            .with_title(desc.title)
-            .build(window_target);
+            .with_title(desc.title);
+
+        Self {
+            event_loop,
+            window
+        }
     }
 }
 
@@ -31,11 +37,12 @@ pub struct Engine {
     config: wgpu::SurfaceConfiguration,
     size: winit::dpi::PhysicalSize<u32>,
     pipelines: Vec<RenderPipeline>,
+    context: Context,
     update: fn(&HashSet<u32>),
 }
 
 impl Engine {
-    async fn new(desc: EngineDescriptor, window: Window) -> Engine {
+    async fn new(context: Context, window: Window) -> Engine {
 
         let size = window.inner_size();
 
@@ -150,6 +157,7 @@ impl Engine {
             queue,
             config,
             pipelines: vec![vertex_pipeline],
+            context,
             update: |input| print!("No Update Function: {:?}", input),
         }
     }
@@ -193,12 +201,11 @@ pub struct EngineDescriptor {
 }
 
 impl EngineDescriptor {
-    pub fn new(title: Option<String>, dim: Option<[u32; 2]>, icon: Option<sprite::Sprite>, resizable: Option<bool>) -> Self {
+    pub fn new(title: Option<String>, dim: Option<[u32; 2]>, icon: Option<sprite::Sprite>) -> Self {
         Self { 
             title: title.unwrap_or(String::from("Game")), 
             dim: dim.unwrap_or([600, 350]), 
             icon: icon.unwrap_or(sprite::Sprite::default()),
-            resizable: resizable.unwrap_or(false),
         }
     }
 }
