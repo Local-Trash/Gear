@@ -1,21 +1,26 @@
+//! # Fish
+//! this is the Fish game engine documentation. It is a 2d game engine that is meant to make pc development with rust easier for Keycap Studios.
+
 #![allow(non_snake_case)]
 #![allow(dead_code)]
 
-use std::collections::HashSet;
-use log::{info, log};
+use std::{collections::HashSet, ops::Deref};
+use log::{log, Level};
 use wgpu::{Backends, RenderPipeline};
-use winit::{window::{Window, WindowBuilder}, event_loop::EventLoopBuilder, dpi::{Size, PhysicalSize}};
+use winit::{window::{Window, WindowBuilder},event_loop::{EventLoopBuilder, EventLoop}, dpi::{Size, PhysicalSize}};
 
 pub mod math;
 pub mod sprite;
 mod shader;
 
+/// gives the window and event loop to the engine.
 pub struct Context {
-    pub window: WindowBuilder,
-    pub event_loop: EventLoopBuilder<()>,
+    window: WindowBuilder,
+    event_loop: EventLoopBuilder<()>,
 }
 
 impl Context {
+    /// Creates a new context.
     pub fn new() -> Self {
         let event_loop = EventLoopBuilder::new();
         let window = WindowBuilder::new()
@@ -29,6 +34,7 @@ impl Context {
         }
     }
 
+    /// Changes the size of the window.
     pub fn withSize(self, width: u32, height: u32) -> Self {
         Self { 
             window: self.window.with_inner_size(Size::Physical(PhysicalSize { width, height})), 
@@ -36,6 +42,7 @@ impl Context {
         }
     }
 
+    /// Changes the title of the window.
     pub fn withTitle(self, title: &str) -> Self {
         Self {
             window: self.window.with_title(title),
@@ -44,6 +51,7 @@ impl Context {
     }
 }
 
+/// This is the main Engine. This holds all of the backend variables that are required when rendering to a screen.
 pub struct Engine {
     surface: wgpu::Surface,
     device: wgpu::Device,
@@ -51,12 +59,16 @@ pub struct Engine {
     config: wgpu::SurfaceConfiguration,
     size: winit::dpi::PhysicalSize<u32>,
     pipelines: Vec<RenderPipeline>,
-    context: Context,
     update: fn(&HashSet<u32>),
+    ctx: (Window, EventLoop<()>)
 }
 
 impl Engine {
-    async fn new(context: Context, window: Window) -> Engine {
+    /// Creates a engine.
+    async fn new(mut context: Context) -> Engine {
+        let eventLoop = context.event_loop.build();
+        let window = context.window.build(eventLoop.deref()).unwrap();
+
 
         let size = window.inner_size();
 
@@ -64,7 +76,7 @@ impl Engine {
 
         let surface = unsafe {
             match instance.create_surface(&window) {
-                Ok(v) => {info!("Surface was created");v},
+                Ok(v) => {log!(Level::Trace, "Surface was created");v},
                 Err(e) => {log!(log::Level::Error, "Surface creation error: {:?}", e); std::process::exit(1)},
             }
         };
@@ -76,7 +88,7 @@ impl Engine {
                 force_fallback_adapter: false,
             })
             .await {
-                Some(v) => v,
+                Some(v) => {log!(Level::Trace, "Adapter was created");v},
                 None => {log!(log::Level::Error, "Request adapter error"); std::process::exit(1)},
             };
 
@@ -171,19 +183,18 @@ impl Engine {
             queue,
             config,
             pipelines: vec![vertex_pipeline],
-            context,
-            update: |input| print!("No Update Function: {:?}", input),
+            update: |input| print!("No Update Function. Input: {:?}", input),
+            ctx: (window, eventLoop)
         }
     }
 
-    fn run(&self, event_loop: winit::event_loop::EventLoop<()>) {
-
+    fn run(self) {
         let mut inputMap: HashSet<u32> = HashSet::new();
         let mut updates: Vec<fn(&HashSet<u32>)> = Vec::new();
 
         updates.push(self.update);
 
-        event_loop.run(move |event, _, control_flow| {
+        self.ctx.1.run(move |event, _, control_flow| {
             *control_flow = winit::event_loop::ControlFlow::Poll;
             match event {
                 winit::event::Event::WindowEvent {
