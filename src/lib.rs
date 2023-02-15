@@ -16,16 +16,30 @@ pub struct Context {
 }
 
 impl Context {
-    pub fn new(desc: EngineDescriptor) -> Self {
+    pub fn new() -> Self {
         let event_loop = EventLoopBuilder::new();
         let window = WindowBuilder::new()
             .with_resizable(false)
-            .with_inner_size(Size::Physical(PhysicalSize { width: desc.dim[0], height: desc.dim[1]}))
-            .with_title(desc.title);
+            .with_inner_size(Size::Physical(PhysicalSize { width: 500u32, height: 500u32}))
+            .with_title("Game");
 
         Self {
             event_loop,
             window
+        }
+    }
+
+    pub fn withSize(self, width: u32, height: u32) -> Self {
+        Self { 
+            window: self.window.with_inner_size(Size::Physical(PhysicalSize { width, height})), 
+            event_loop: self.event_loop
+        }
+    }
+
+    pub fn withTitle(self, title: &str) -> Self {
+        Self {
+            window: self.window.with_title(title),
+            event_loop: self.event_loop
         }
     }
 }
@@ -191,21 +205,5 @@ impl Engine {
                 _ => {},
             }
         });
-    }
-}
-
-pub struct EngineDescriptor {
-    title: String,
-    dim: [u32; 2],
-    icon: sprite::Sprite,
-}
-
-impl EngineDescriptor {
-    pub fn new(title: Option<String>, dim: Option<[u32; 2]>, icon: Option<sprite::Sprite>) -> Self {
-        Self { 
-            title: title.unwrap_or(String::from("Game")), 
-            dim: dim.unwrap_or([600, 350]), 
-            icon: icon.unwrap_or(sprite::Sprite::default()),
-        }
     }
 }
