@@ -188,7 +188,7 @@ impl Engine {
         }
     }
 
-    /// Runs the Engine and 
+    /// Runs the Engine.
     fn run(self) {
         let mut inputMap: HashSet<u32> = HashSet::new();
         let mut updates: Vec<fn(&HashSet<u32>)> = Vec::new();
@@ -217,5 +217,10 @@ impl Engine {
                 _ => {},
             }
         });
+    }
+
+    /// Inserts the given update function into the Engine. The update replaces the old one and is the global one.
+    fn update(mut self, func: fn(&HashSet<u32>)) {
+        self.update = func;
     }
 }
