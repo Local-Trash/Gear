@@ -2,7 +2,7 @@
 name = "fish"
 version = "0.1.0"
 edition = "2021"
-author = ["KeyCap Studio", "LocalTash"]
+author = ["KeyCap Studio<www.keycapstudio.io>", "LocalTash<@Local-Trash>"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

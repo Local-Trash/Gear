@@ -1,5 +1,7 @@
 //! # Fish
 //! this is the Fish game engine documentation. It is a 2d game engine that is meant to make pc development with rust easier for Keycap Studios.
+//! ## Getting Started
+//! to 
 
 #![allow(non_snake_case)]
 #![allow(dead_code)]
@@ -13,20 +15,18 @@ pub mod math;
 pub mod sprite;
 mod shader;
 
-/// gives the window and event loop to the engine.
+/// gives the window and event loop to the engine. This does allow you to have access to the window and customize it to your liking
 pub struct Context {
-    window: WindowBuilder,
-    event_loop: EventLoopBuilder<()>,
+    pub window: WindowBuilder,
+    pub event_loop: EventLoopBuilder<()>,
 }
 
 impl Context {
     /// Creates a new context.
     pub fn new() -> Self {
-        let event_loop = EventLoopBuilder::new();
-        let window = WindowBuilder::new()
-            .with_resizable(false)
-            .with_inner_size(Size::Physical(PhysicalSize { width: 500u32, height: 500u32}))
-            .with_title("Game");
+        let event_loop: EventLoopBuilder<()> = EventLoopBuilder::new();
+        let window: WindowBuilder = WindowBuilder::new()
+            .with_resizable(false);
 
         Self {
             event_loop,
@@ -64,10 +64,10 @@ pub struct Engine {
 }
 
 impl Engine {
-    /// Creates a engine.
+    /// Creates a engine. Give Context to the engine.
     async fn new(mut context: Context) -> Engine {
-        let eventLoop = context.event_loop.build();
-        let window = context.window.build(eventLoop.deref()).unwrap();
+        let eventLoop: EventLoop<()> = context.event_loop.build();
+        let window: Window = context.window.build(eventLoop.deref()).unwrap();
 
 
         let size = window.inner_size();
@@ -188,6 +188,7 @@ impl Engine {
         }
     }
 
+    /// Runs the Engine and 
     fn run(self) {
         let mut inputMap: HashSet<u32> = HashSet::new();
         let mut updates: Vec<fn(&HashSet<u32>)> = Vec::new();
