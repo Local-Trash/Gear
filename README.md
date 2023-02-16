@@ -7,6 +7,6 @@ Fish is a 2d rust game engine built on [wgpu](https://wgpu.rs). This is a simple
 First, because we aren't going to post this onto crates you need to link it to this github repo. 
 ```toml
 [dependencies]
-fish = { path = "https://github.com/Local-Trash/Fish.git" }
+fish = { git = "https://github.com/Local-Trash/Fish" }
 ```
 This links cargo to the library.

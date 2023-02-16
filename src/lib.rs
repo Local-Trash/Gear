@@ -1,7 +1,17 @@
 //! # Fish
 //! this is the Fish game engine documentation. It is a 2d game engine that is meant to make pc development with rust easier for Keycap Studios.
 //! ## Getting Started
-//! to 
+//! This is the code you can use to get started and create a window.
+//! ```toml
+//! [dependencies]
+//! pollster = "*"
+//! fish = { git = "https://github.com/Local-Trash/Fish" }
+//! ```
+//! ```rust
+//! let ctx = fish::Context::new()
+//!     .withTitle("Example");
+//! fish::Engine::new(ctx).run();
+//! ```
 
 #![allow(non_snake_case)]
 #![allow(dead_code)]
