@@ -10,7 +10,8 @@
 //! ```rust
 //! let ctx = fish::Context::new()
 //!     .withTitle("Example");
-//! fish::Engine::new(ctx).run();
+//! let engine = pollster::block_on(fish::Engine::new());
+//! engine.run();
 //! ```
 
 #![allow(non_snake_case)]
@@ -19,7 +20,7 @@
 use std::{collections::HashSet, ops::Deref};
 use log::{log, Level};
 use wgpu::{Backends, RenderPipeline};
-use winit::{window::{Window, WindowBuilder},event_loop::{EventLoopBuilder, EventLoop}, dpi::{Size, PhysicalSize}};
+use winit::{window::{Window, WindowBuilder}, event_loop::{EventLoopBuilder, EventLoop}, dpi::{Size, PhysicalSize}};
 
 pub mod math;
 pub mod sprite;
@@ -70,12 +71,13 @@ pub struct Engine {
     size: winit::dpi::PhysicalSize<u32>,
     pipelines: Vec<RenderPipeline>,
     update: fn(&HashSet<u32>),
-    ctx: (Window, EventLoop<()>)
+    ctx: (Window, EventLoop<()>),
+    enities: Vec<(Enity, f32)>
 }
 
 impl Engine {
     /// Creates a engine. Give Context to the engine.
-    async fn new(mut context: Context) -> Engine {
+    pub async fn new(mut context: Context) -> Engine {
         let eventLoop: EventLoop<()> = context.event_loop.build();
         let window: Window = context.window.build(eventLoop.deref()).unwrap();
 
@@ -194,12 +196,13 @@ impl Engine {
             config,
             pipelines: vec![vertex_pipeline],
             update: |input| print!("No Update Function. Input: {:?}", input),
-            ctx: (window, eventLoop)
+            ctx: (window, eventLoop),
+            enities: vec![]
         }
     }
 
     /// Runs the Engine.
-    fn run(self) {
+    pub fn run(self) {
         let mut inputMap: HashSet<u32> = HashSet::new();
         let mut updates: Vec<fn(&HashSet<u32>)> = Vec::new();
 
@@ -220,8 +223,8 @@ impl Engine {
                 },
                 winit::event::Event::WindowEvent { event: winit::event::WindowEvent::CloseRequested, .. } => *control_flow = winit::event_loop::ControlFlow::Exit,
                 winit::event::Event::MainEventsCleared => {
-                    for fun in &updates {
-                        (fun)(&inputMap);
+                    for func in &updates {
+                        (func)(&inputMap);
                     }
                 },
                 _ => {},
@@ -230,7 +233,27 @@ impl Engine {
     }
 
     /// Inserts the given update function into the Engine. The update replaces the old one and is the global one.
-    fn update(mut self, func: fn(&HashSet<u32>)) {
+    pub fn insertUpdate(mut self, func: fn(&HashSet<u32>)) {
         self.update = func;
     }
+
+    /// Inserts Enities into the game engine and then returns their id to be able to be used in the global scope.
+    pub fn insertEnities(&mut self, enity: Enity) -> f32 {
+        let id = {
+            let mut id = 0.0;
+            for ent in &self.enities {
+                id += ent.1;
+            }
+            id
+        };
+        self.enities.push((enity, id));
+        id
+    }
+}
+
+pub struct Enity {
+    pos: math::Vec2,
+    active: bool,
+    update: fn(HashSet<u32>),
+    traits: (),
 }
