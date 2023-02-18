@@ -2,6 +2,8 @@ mod vertex;
 
 /// Used for using for making vectors
 pub trait Vectors {
+    /// Creats a new Vector
+    fn new(pos: &[f32]) -> Self;
     /// Adds two Vectors together.
     fn add(self, vector: impl Vectors);
     /// Subtracts two Vectors together.
@@ -13,6 +15,13 @@ pub trait Vectors {
 }
 
 impl Vectors for Vec2 {
+    fn new(pos: &[f32]) -> Self {
+        Self {
+            x: pos[0],
+            y: pos[1]
+        }
+    }
+
     fn add(mut self, vector: impl Vectors) {
         let [x, y] = vector.get2D();
         self.x += x;
@@ -41,15 +50,6 @@ pub struct Vec2 {
     pub y: f32,
 }
 
-impl Vec2 {
-    fn new(x: f32, y: f32) -> Self {
-        Self {
-            x,
-            y,
-        }
-    }
-}
-
 impl Default for Vec2 {
     fn default() -> Self {
         Self {
@@ -60,6 +60,7 @@ impl Default for Vec2 {
 }
 
 /// A 3d vector, used for position on a 3d plain.
+#[derive(Clone, Copy)]
 pub struct Vec3 {
     pub x: f32,
     pub y: f32,
@@ -67,6 +68,14 @@ pub struct Vec3 {
 }
 
 impl Vectors for Vec3 {
+    fn new(pos: &[f32]) -> Self {
+        Self {
+            x: pos[0],
+            y: pos[1],
+            z: pos[2]
+        }
+    }
+
     fn add(mut self, vector: impl Vectors) {
         let [x,y,z] = vector.get3D();
         self.x += x;
@@ -87,5 +96,15 @@ impl Vectors for Vec3 {
 
     fn get3D(self) -> [f32; 3] {
         [self.x, self.y, self.z]
+    }
+}
+
+impl Default for Vec3 {
+    fn default() -> Self {
+        Self {
+            x: 0f32,
+            y: 0f32,
+            z: 0f32
+        }
     }
 }
