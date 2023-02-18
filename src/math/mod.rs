@@ -46,7 +46,9 @@ impl Vectors for Vec2 {
 /// A vector 2, used for positions on a 2d plain.
 #[derive(Clone, Copy)]
 pub struct Vec2 {
+    /// the x value on a coordinate plain
     pub x: f32,
+    /// the y vale on a coordinate plain
     pub y: f32,
 }
 
@@ -62,8 +64,11 @@ impl Default for Vec2 {
 /// A 3d vector, used for position on a 3d plain.
 #[derive(Clone, Copy)]
 pub struct Vec3 {
+    /// the x value on a coordinate plain
     pub x: f32,
+    /// the y value on a coordinate plain
     pub y: f32,
+    /// the x value on a coordinate plain
     pub z: f32,
 }
 
