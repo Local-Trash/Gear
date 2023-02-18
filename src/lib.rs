@@ -1,5 +1,5 @@
 //! # Fish
-//! this is the Fish game engine documentation. It is a 2d game engine that is meant to make pc development with rust easier for Keycap Studios.
+//! This is the Fish game engine documentation. It is a 2d game engine that is meant to make pc development with rust easier for Keycap Studios.
 //! ## Getting Started
 //! This is the code you can use to get started and create a window.
 //! ```toml
@@ -18,9 +18,10 @@
 #![allow(dead_code)]
 
 use std::{collections::HashSet, ops::Deref};
-use log::{log, Level};
-use wgpu::{Backends, RenderPipeline};
-use winit::{window::{Window, WindowBuilder}, event_loop::{EventLoopBuilder, EventLoop}, dpi::{Size, PhysicalSize}};
+pub use log::{log, Level};
+pub use math::Vec2;
+pub use wgpu::{Backends, RenderPipeline};
+pub use winit::{window::{Window, WindowBuilder}, event_loop::{EventLoopBuilder, EventLoop}, dpi::{Size, PhysicalSize}};
 
 pub mod math;
 pub mod sprite;
@@ -28,7 +29,9 @@ mod shader;
 
 /// gives the window and event loop to the engine. This does allow you to have access to the window and customize it to your liking
 pub struct Context {
+    /// This is used for making the window. Can be changed with the winit api.
     pub window: WindowBuilder,
+    /// This is the event_loop builder. You can make your own, but why.
     pub event_loop: EventLoopBuilder<()>,
 }
 
@@ -72,7 +75,7 @@ pub struct Engine {
     pipelines: Vec<RenderPipeline>,
     update: fn(&HashSet<u32>),
     ctx: (Window, EventLoop<()>),
-    enities: Vec<(Enity, f32)>
+    enities: Vec<Enity>
 }
 
 impl Engine {
@@ -237,23 +240,31 @@ impl Engine {
         self.update = func;
     }
 
-    /// Inserts Enities into the game engine and then returns their id to be able to be used in the global scope.
+    /// Inserts Enities into the game engine and then returns their id to be able to be used in the global update function.
     pub fn insertEnities(&mut self, enity: Enity) -> f32 {
         let id = {
-            let mut id = 0.0;
+            let mut id = 1.0;
             for ent in &self.enities {
-                id += ent.1;
+                id += ent.id;
             }
             id
         };
-        self.enities.push((enity, id));
+        self.enities.push(enity);
         id
     }
 }
 
-pub struct Enity {
-    pos: math::Vec2,
-    active: bool,
-    update: fn(HashSet<u32>),
-    traits: (),
+/// Used for implemnting enities into the ecs
+pub struct Enity
+{
+    /// The Vector position
+    pub pos: Vec2,
+    /// Weather it should 
+    pub active: bool,
+    /// The update function of the Enity
+    pub update: (),
+    /// This is a tupple that holds the did components of the Enity
+    pub traits: (),
+    /// The objects id
+    pub id: f32,
 }
