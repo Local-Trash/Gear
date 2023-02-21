@@ -18,13 +18,16 @@
 #![allow(dead_code)]
 
 use std::{collections::HashSet, ops::Deref};
-pub use log::{log, Level};
-pub use math::Vec2;
-pub use wgpu::{Backends, RenderPipeline};
-pub use winit::{window::{Window, WindowBuilder}, event_loop::{EventLoopBuilder, EventLoop}, dpi::{Size, PhysicalSize}};
+use Math::*;
+pub use Log::*;
+use wgpu::{Backends, RenderPipeline};
+use winit::{window::{Window, WindowBuilder}, event_loop::{EventLoopBuilder, EventLoop}, dpi::{Size, PhysicalSize}};
+pub use wgpu;
+pub use winit;
 
-pub mod math;
-pub mod sprite;
+pub mod Math;
+pub mod Sprite;
+pub mod Log;
 mod shader;
 
 /// gives the window and event loop to the engine. This does allow you to have access to the window and customize it to your liking
@@ -66,7 +69,7 @@ impl Context {
 }
 
 /// This is the main Engine. This holds all of the backend variables that are required when rendering to a screen.
-pub struct Engine {
+pub struct Engine<V> where V: Vectors {
     surface: wgpu::Surface,
     device: wgpu::Device,
     queue: wgpu::Queue,
@@ -75,12 +78,12 @@ pub struct Engine {
     pipelines: Vec<RenderPipeline>,
     update: fn(&HashSet<u32>),
     ctx: (Window, EventLoop<()>),
-    enities: Vec<Enity>
+    enities: Vec<Enity<V>>
 }
 
-impl Engine {
+impl<V> Engine<V> where V: Vectors {
     /// Creates a engine. Give Context to the engine.
-    pub async fn new(mut context: Context) -> Engine {
+    pub async fn new(mut context: Context) -> Engine<V> {
         let eventLoop: EventLoop<()> = context.event_loop.build();
         let window: Window = context.window.build(eventLoop.deref()).unwrap();
 
@@ -91,10 +94,12 @@ impl Engine {
 
         let surface = unsafe {
             match instance.create_surface(&window) {
-                Ok(v) => {log!(Level::Trace, "Surface was created");v},
-                Err(e) => {log!(log::Level::Error, "Surface creation error: {:?}", e); std::process::exit(1)},
+                Ok(v) => v,
+                Err(e) => log!(LogType::Error, "Failed to create surface: {:?}", e),
             }
         };
+
+        log!(LogType::Debug, "Surface created: {:?}", surface);
 
         let adapter = match instance
             .request_adapter(&wgpu::RequestAdapterOptions {
@@ -103,8 +108,8 @@ impl Engine {
                 force_fallback_adapter: false,
             })
             .await {
-                Some(v) => {log!(Level::Trace, "Adapter was created");v},
-                None => {log!(log::Level::Error, "Request adapter error"); std::process::exit(1)},
+                Some(v) => v,
+                None => panic!("Failed to find an appropriate adapter."),
             };
 
         let (device, queue) = match adapter
@@ -118,8 +123,7 @@ impl Engine {
             )
             .await {
                 Ok(d) => d,
-                Err(e) => {log!(log::Level::Error, "Device and Queue creation error: {:?}", e); std::process::exit(1);
-                },
+                Err(e) => panic!("Failed to create device: {:?}", e),
             };
 
         let config = wgpu::SurfaceConfiguration {
@@ -179,9 +183,6 @@ impl Engine {
             multiview: None,
         });
 
-        log!(log::Level::Trace, "Engine was created");
-
-
         Self {
             size,
             surface,
@@ -189,7 +190,7 @@ impl Engine {
             queue,
             config,
             pipelines: vec![vertex_pipeline],
-            update: |input| print!("No Update Function. Input: {:?}", input),
+            update: |_| log!(LogType::Warning, "No global update function was given."),
             ctx: (window, eventLoop),
             enities: vec![]
         }
@@ -232,7 +233,7 @@ impl Engine {
     }
 
     /// Inserts Enities into the game engine and then returns their id to be able to be used in the global update function.
-    pub fn insertEnities(&mut self, enity: Enity) -> f32 {
+    pub fn insertEnities(&mut self, enity: Enity<V>) -> f32 {
         let id = {
             let mut id = 1.0;
             for ent in &self.enities {
@@ -246,10 +247,10 @@ impl Engine {
 }
 
 /// Used for implemnting enities into the ecs
-pub struct Enity
+pub struct Enity<V> where V: Vectors
 {
     /// The Vector position
-    pub pos: Vec2,
+    pub pos: V::Vector,
     /// Weather it should 
     pub active: bool,
     /// The update function of the Enity

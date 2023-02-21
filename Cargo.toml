@@ -3,19 +3,28 @@ name = "fish"
 version = "0.1.0"
 edition = "2021"
 author = ["KeyCap Studio<www.keycapstudio.io>", "LocalTash <@Local-Trash>"]
-description = "A ECS game engine"
+description = "A ECS game engine, made for making easy pc games"
+license = "MPL"
+license-file = "LICENSE"
+repository = "https://github.com/Local-Trash/Fish/"
+readme = "README.md"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-cfg-if = "1"
 winit = "0.28.1"
-env_logger = "0.10"
-log = "0.4"
 wgpu = "0.15"
 bytemuck = { version = "1.12", features = [ "derive" ] }
+chrono = { version = "*", default-features = false, features = ["std"]}
+colored = "2.0.0"
 
 [dependencies.image]
 version = "0.24"
 default-features = false
 features = ["png", "jpeg"]
+
+[features]
+fullLog = ["debug", "warning", "error"]
+debug = []
+warning = []
+error = []

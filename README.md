@@ -1,12 +1,11 @@
 # ![Fish](./logo.png)
 
 # Fish
-Fish is a 2d rust game engine built on [wgpu](https://wgpu.rs). This is a simple game engine made for internal projects of KeyCap Studio :thumbsup:. Sadly, we will probably not make any in depth tutorials for the engine. We will also not post this onto crates.io. 
+Fish is an E.C.S. game engine. Built on [Wgpu](https://wgpu.rs). It is made for the KeyCap Studios. This repo will be mostly community maintained.
 
-## Dependency
-First, because we aren't going to post this onto crates you need to link it to this github repo. 
+## Getting Started
+To get started with the Fish engine, you need to add it to your dependencies. Write the following code below in your .toml file.
 ```toml
 [dependencies]
-fish = { git = "https://github.com/Local-Trash/Fish" }
+fish = { git = "https://github.com/Local-Trash/Fish/"}
 ```
-This links cargo to the library.

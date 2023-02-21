@@ -1,20 +1,20 @@
 mod vertex;
 
-/// Used for using for making vectors
-pub trait Vectors {
+/// Used for using for making Vectors
+pub trait VectorProp {
     /// Creats a new Vector
     fn new(pos: &[f32]) -> Self;
-    /// Adds two Vectors together.
-    fn add(self, vector: impl Vectors);
-    /// Subtracts two Vectors together.
-    fn subtract(self, vector: impl Vectors);
+    /// Adds two VectorProp together.
+    fn add(self, vector: impl VectorProp);
+    /// Subtracts two VectorProp together.
+    fn subtract(self, vector: impl VectorProp);
     /// Gets the 2d position of the Vector
     fn get2D(self) -> [f32; 2];
     /// Gets the 3d position of the Vector
     fn get3D(self) -> [f32; 3];
 }
 
-impl Vectors for Vec2 {
+impl VectorProp for Vec2 {
     fn new(pos: &[f32]) -> Self {
         Self {
             x: pos[0],
@@ -22,13 +22,13 @@ impl Vectors for Vec2 {
         }
     }
 
-    fn add(mut self, vector: impl Vectors) {
+    fn add(mut self, vector: impl VectorProp) {
         let [x, y] = vector.get2D();
         self.x += x;
         self.y += y;
     }
 
-    fn subtract(mut self, vector: impl Vectors) {
+    fn subtract(mut self, vector: impl VectorProp) {
         let [x, y] = vector.get2D();
         self.x -= x;
         self.y -= y;
@@ -72,7 +72,7 @@ pub struct Vec3 {
     pub z: f32,
 }
 
-impl Vectors for Vec3 {
+impl VectorProp for Vec3 {
     fn new(pos: &[f32]) -> Self {
         Self {
             x: pos[0],
@@ -81,14 +81,14 @@ impl Vectors for Vec3 {
         }
     }
 
-    fn add(mut self, vector: impl Vectors) {
+    fn add(mut self, vector: impl VectorProp) {
         let [x,y,z] = vector.get3D();
         self.x += x;
         self.y += y;
         self.z += z;
     }
 
-    fn subtract(mut self, vector: impl Vectors) {
+    fn subtract(mut self, vector: impl VectorProp) {
         let [x,y,z] = vector.get3D();
         self.x -= x;
         self.y -= y;
@@ -112,4 +112,9 @@ impl Default for Vec3 {
             z: 0f32
         }
     }
+}
+
+/// Stores the Vector for the Entity.
+pub trait Vectors {
+    type Vector: VectorProp;
 }
