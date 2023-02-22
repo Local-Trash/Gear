@@ -237,14 +237,14 @@ impl<V> Engine<V> where V: Vectors {
 }
 
 /// Used for implemnting enities into the ecs
-pub struct Enity<V> where V: Vectors
+pub struct Enity<V, F> where V: Vectors, F: FnMut(&HashSet<u32>, Enity<V, F>)
 {
     /// The Vector position
     pub pos: V::Vector,
     /// Weather it should 
     pub active: bool,
     /// The update function of the Enity
-    pub update: (),
+    pub update: F,
     /// This is a tupple that holds the did components of the Enity
     pub traits: (),
     /// The objects id
