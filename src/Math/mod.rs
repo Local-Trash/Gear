@@ -1,7 +1,7 @@
 mod vertex;
 
 /// Used for using for making Vectors
-pub trait VectorProp {
+pub trait VectorProp : Copy + Clone {
     /// Creats a new Vector
     fn new(pos: &[f32]) -> Self;
     /// Adds two VectorProp together.

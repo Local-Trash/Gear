@@ -21,7 +21,7 @@ colored = "2.0.0"
 [dependencies.image]
 version = "0.24"
 default-features = false
-features = ["png", "jpeg"]
+features = ["png"]
 
 [features]
 fullLog = ["debug", "warning", "error"]

@@ -1,18 +1,5 @@
 //! # Fish
 //! This is the Fish game engine documentation. It is a 2d game engine that is meant to make pc development with rust easier for Keycap Studios.
-//! ## Getting Started
-//! This is the code you can use to get started and create a window.
-//! ```toml
-//! [dependencies]
-//! pollster = "*"
-//! fish = { git = "https://github.com/Local-Trash/Fish" }
-//! ```
-//! ```rust
-//! let ctx = fish::Context::new()
-//!     .withTitle("Example");
-//! let engine = pollster::block_on(fish::Engine::new());
-//! engine.run();
-//! ```
 
 #![allow(non_snake_case)]
 #![allow(dead_code)]
@@ -103,23 +90,29 @@ pub struct Engine<V> where V: Vectors {
 impl<V> Engine<V> where V: Vectors {
     /// Creates a engine. Give Context to the engine.
     pub async fn new(mut context: Context) -> Engine<V> {
+        // This builds the event_loop and window for the rest of the function and engine.
         let eventLoop: EventLoop<()> = context.event_loop.build();
         let window: Window = context.window.build(eventLoop.deref()).unwrap();
 
-
+        // gets the size of the window.
         let size = window.inner_size();
 
+        // Creates a new Instance
         let instance = wgpu::Instance::new(wgpu::InstanceDescriptor { backends: Backends::PRIMARY, ..Default::default() });
 
+        // The Engine takes all in all errors.
         let surface = unsafe {
             match instance.create_surface(&window) {
                 Ok(v) => v,
-                Err(e) => log!(LogType::Error, "Failed to create surface: {:?}", e),
+                Err(e) => {
+                    log!(LogType::Error, "Failed to create surface: {:?}", e); 
+                    panic!("Failed to create surface: {:?}", e) // This is to prevet the error that it doesn't return Surface.
+                },
             }
         };
-
         log!(LogType::Debug, "Surface created: {:?}", surface);
 
+        // Creates a adapter
         let adapter = match instance
             .request_adapter(&wgpu::RequestAdapterOptions {
                 power_preference: wgpu::PowerPreference::default(),
@@ -129,8 +122,9 @@ impl<V> Engine<V> where V: Vectors {
             .await {
                 Some(v) => v,
                 None => panic!("Failed to find an appropriate adapter."),
-            };
+        };
 
+        // Creates a device and queue
         let (device, queue) = match adapter
             .request_device(
                 &wgpu::DeviceDescriptor {
@@ -143,8 +137,9 @@ impl<V> Engine<V> where V: Vectors {
             .await {
                 Ok(d) => d,
                 Err(e) => panic!("Failed to create device: {:?}", e),
-            };
+        };
 
+        // creates the config
         let config = wgpu::SurfaceConfiguration {
             usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
             format: surface.get_capabilities(&adapter).formats[0],
@@ -156,6 +151,7 @@ impl<V> Engine<V> where V: Vectors {
         };
         surface.configure(&device, &config);
 
+        // takes the s
         let shader = device.create_shader_module(wgpu::ShaderModuleDescriptor {
             label: Some("Shader"),
             source: wgpu::ShaderSource::Wgsl(String::from(shader::SHADER).into()),
@@ -266,16 +262,39 @@ impl<V> Engine<V> where V: Vectors {
 }
 
 /// Used for implemnting enities into the ecs
-pub struct Enity<V> where V: Vectors
+pub struct Enity<V, F> where V: Vectors, F: FnMut(&HashSet<u32>, Enity<V, F>)
 {
     /// The Vector position
     pub pos: V::Vector,
     /// Weather it should 
     pub active: bool,
     /// The update function of the Enity
-    pub update: (),
+    pub update: F,
     /// This is a tupple that holds the did components of the Enity
     pub traits: (),
     /// The objects id
     pub id: f32,
+}
+
+#[cfg(test)]
+mod tests {
+    mod log {
+        use crate::{log, LogType};
+
+        #[test]
+        fn success() {
+            // This is testing all parameter cases
+            log!(LogType::Debug, "test");
+            log!(LogType::Debug, "test: {}", 1);
+            log!(LogType::Warning, "test");
+            log!(LogType::Warning, "test: {}", 2);
+        }
+
+        #[test]
+        #[should_panic]
+        fn failure() {
+            log!(LogType::Error, "test");
+            log!(LogType::Error, "test: {}", 1);
+        }
+    }
 }
