@@ -30,12 +30,19 @@ pub mod Sprite;
 pub mod Log;
 mod shader;
 
+pub enum Dimension {
+    TwoD,
+    ThreeD,
+}
+
 /// gives the window and event loop to the engine. This does allow you to have access to the window and customize it to your liking
 pub struct Context {
     /// This is used for making the window. Can be changed with the winit api.
     pub window: WindowBuilder,
     /// This is the event_loop builder. You can make your own, but why.
     pub event_loop: EventLoopBuilder<()>,
+    /// The Dimesion of a the game. You can possible create your own system to make your game a mix of both, but it will not be offically supported.
+    pub dim: Dimension,
 }
 
 impl Context {
@@ -47,23 +54,35 @@ impl Context {
 
         Self {
             event_loop,
-            window
+            window,
+            dim: Dimension::TwoD,
         }
     }
 
-    /// Changes the size of the window.
+    /// Changes the size of the window
     pub fn withSize(self, width: u32, height: u32) -> Self {
         Self { 
-            window: self.window.with_inner_size(Size::Physical(PhysicalSize { width, height})), 
-            event_loop: self.event_loop
+            window: self.window.with_inner_size(Size::Physical(PhysicalSize { width, height })), 
+            event_loop: self.event_loop,
+            dim: self.dim,
         }
     }
 
-    /// Changes the title of the window.
+    /// Changes the title of the window
     pub fn withTitle(self, title: &str) -> Self {
         Self {
             window: self.window.with_title(title),
-            event_loop: self.event_loop
+            event_loop: self.event_loop,
+            dim: self.dim,
+        }
+    }
+
+    /// Changes the Dimension of the engine
+    pub fn withdim(self, dim: Dimension) -> Self {
+        Self {
+            dim,
+            event_loop: self.event_loop,
+            window: self.window,
         }
     }
 }
