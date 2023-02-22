@@ -1,3 +1,5 @@
+use colored::Colorize;
+
 /// This is a custom logging macro for the library.
 /// # Examples
 /// ```rust
@@ -13,7 +15,8 @@ macro_rules! log {
             #[cfg(feature = "warning")]
             LogType::Warning => println!("[{} {}] {:?}", Utc::now().format("%Y-%m-%d %H:%M:%S%.3f").to_string(), $enum.red(), format!("{} {:?}", $msg, $err)),
             LogType::Error => {
-                println!("[{} {}] {:?}", chrono::Utc::now().format("%Y-%m-%d %H:%M:%S%.3f").to_string(), $enum.red(), format!("{} {:?}", $msg, $err));
+                use colored::Colorize;
+                println!("[{} {}] {:?}", chrono::Utc::now().format("%Y-%m-%d %H:%M:%S%.3f").to_string(), format!("{}", $enum).red(), format!("{} {:?}", $msg, $err));
                 panic!("{:?}", $err);
             },
             _ => (),
@@ -27,7 +30,8 @@ macro_rules! log {
             LogType::Warning => println!("[{} {}] {:?}", Utc::now().format("%Y-%m-%d %H:%M:%S%.3f").to_string(), $enum.red(), $msg),
             LogType::Error => {
                 use chrono::Utc;
-                println!("[{} {}] {:?}", Utc::now().format("%Y-%m-%d %H:%M:%S%.3f").to_string(), $enum.red(), $msg);
+                use colored::Colorize;
+                println!("[{} {}] {:?}", Utc::now().format("%Y-%m-%d %H:%M:%S%.3f").to_string(), format!("{}", $enum).red(), $msg);
                 panic!("{}", $msg);
             }
             _ => (),
@@ -35,9 +39,19 @@ macro_rules! log {
     };
 }
 
-#[derive(Debug)]
+#[derive(Debug, )]
 pub enum LogType {
     Warning,
     Debug,
     Error,
+}
+
+impl std::fmt::Display for LogType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            LogType::Warning => write!(f, "{}", format!("{}", "Warning".yellow())),
+            LogType::Debug => write!(f, "{}", format!("{}", "Debug".green())),
+            LogType::Error => write!(f, "{}", format!("{}", "Error".red())),
+        }
+    }
 }
