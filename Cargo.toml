@@ -15,7 +15,7 @@ readme = "README.md"
 winit = "0.28.1"
 wgpu = "0.15"
 bytemuck = { version = "1.12", features = [ "derive" ] }
-chrono = { version = "*", default-features = false, features = ["std"]}
+chrono = { version = "*", default-features = false, features = ["clock"]}
 colored = "2.0.0"
 
 [dependencies.image]
@@ -24,7 +24,6 @@ default-features = false
 features = ["png"]
 
 [features]
-fullLog = ["debug", "warning", "error"]
+fullLog = ["debug", "warning"]
 debug = []
 warning = []
-error = []

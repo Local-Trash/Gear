@@ -75,7 +75,7 @@ impl Context {
 }
 
 /// This is the main Engine. This holds all of the backend variables that are required when rendering to a screen.
-pub struct Engine<V> where V: Vectors {
+pub struct Engine<V, F> where V: Vectors, F: FnMut(&HashSet<u32>, Enity<V, F>) {
     surface: wgpu::Surface,
     device: wgpu::Device,
     queue: wgpu::Queue,
@@ -84,12 +84,12 @@ pub struct Engine<V> where V: Vectors {
     pipelines: Vec<RenderPipeline>,
     update: fn(&HashSet<u32>),
     ctx: (Window, EventLoop<()>),
-    enities: Vec<Enity<V>>
+    enities: Vec<Enity<V, F>>
 }
 
-impl<V> Engine<V> where V: Vectors {
+impl<V, F> Engine<V, F> where V: Vectors, F: FnMut(&HashSet<u32>, Enity<V, F>) {
     /// Creates a engine. Give Context to the engine.
-    pub async fn new(mut context: Context) -> Engine<V> {
+    pub async fn new(mut context: Context) -> Engine<V, F> {
         // This builds the event_loop and window for the rest of the function and engine.
         let eventLoop: EventLoop<()> = context.event_loop.build();
         let window: Window = context.window.build(eventLoop.deref()).unwrap();
@@ -248,7 +248,7 @@ impl<V> Engine<V> where V: Vectors {
     }
 
     /// Inserts Enities into the game engine and then returns their id to be able to be used in the global update function.
-    pub fn insertEnities(&mut self, enity: Enity<V>) -> f32 {
+    pub fn insertEnities(&mut self, enity: Enity<V, F>) -> f32 {
         let id = {
             let mut id = 1.0;
             for ent in &self.enities {
@@ -262,7 +262,7 @@ impl<V> Engine<V> where V: Vectors {
 }
 
 /// Used for implemnting enities into the ecs
-pub struct Enity<V, F> where V: Vectors, F: FnMut(&HashSet<u32>, Enity<V, F>)
+pub struct Enity<V, F> where V: Vectors, F: FnMut(&HashSet<u32>, Self)
 {
     /// The Vector position
     pub pos: V::Vector,
@@ -293,6 +293,7 @@ mod tests {
         #[test]
         #[should_panic]
         fn failure() {
+            // Same as the success, but with error
             log!(LogType::Error, "test");
             log!(LogType::Error, "test: {}", 1);
         }
