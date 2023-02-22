@@ -1,18 +1,5 @@
 //! # Fish
 //! This is the Fish game engine documentation. It is a 2d game engine that is meant to make pc development with rust easier for Keycap Studios.
-//! ## Getting Started
-//! This is the code you can use to get started and create a window.
-//! ```toml
-//! [dependencies]
-//! pollster = "*"
-//! fish = { git = "https://github.com/Local-Trash/Fish" }
-//! ```
-//! ```rust
-//! let ctx = fish::Context::new()
-//!     .withTitle("Example");
-//! let engine = pollster::block_on(fish::Engine::new());
-//! engine.run();
-//! ```
 
 #![allow(non_snake_case)]
 #![allow(dead_code)]
@@ -95,7 +82,10 @@ impl<V> Engine<V> where V: Vectors {
         let surface = unsafe {
             match instance.create_surface(&window) {
                 Ok(v) => v,
-                Err(e) => log!(LogType::Error, "Failed to create surface: {:?}", e),
+                Err(e) => {
+                    log!(LogType::Error, "Failed to create surface: {:?}", e); 
+                    panic!("Failed to create surface: {:?}", e) // This is to prevet the error that it doesn't return Surface.
+                },
             }
         };
 
@@ -259,4 +249,27 @@ pub struct Enity<V> where V: Vectors
     pub traits: (),
     /// The objects id
     pub id: f32,
+}
+
+#[cfg(test)]
+mod tests {
+    mod log {
+        use crate::{log, LogType};
+
+        #[test]
+        fn success() {
+            // This is testing all parameter cases
+            log!(LogType::Debug, "test");
+            log!(LogType::Debug, "test: {}", 1);
+            log!(LogType::Warning, "test");
+            log!(LogType::Warning, "test: {}", 2);
+        }
+
+        #[test]
+        #[should_panic]
+        fn failure() {
+            log!(LogType::Error, "test");
+            log!(LogType::Error, "test: {}", 1);
+        }
+    }
 }
