@@ -1,34 +1,25 @@
 mod vertex;
 
 /// Used for using for making Vectors
-pub trait VectorProp : Copy + Clone {
-    /// Creats a new Vector
-    fn new(pos: &[f32]) -> Self;
-    /// Adds two VectorProp together.
-    fn add(self, vector: impl VectorProp);
-    /// Subtracts two VectorProp together.
-    fn subtract(self, vector: impl VectorProp);
+pub trait Vector : Copy + Clone {
+    /// Adds two Vector together.
+    fn add(self, vector: impl Vector);
+    /// Subtracts two Vector together.
+    fn subtract(self, vector: impl Vector);
     /// Gets the 2d position of the Vector
     fn get2D(self) -> [f32; 2];
     /// Gets the 3d position of the Vector
     fn get3D(self) -> [f32; 3];
 }
 
-impl VectorProp for Vec2 {
-    fn new(pos: &[f32]) -> Self {
-        Self {
-            x: pos[0],
-            y: pos[1]
-        }
-    }
-
-    fn add(mut self, vector: impl VectorProp) {
+impl Vector for Vec2 {
+    fn add(mut self, vector: impl Vector) {
         let [x, y] = vector.get2D();
         self.x += x;
         self.y += y;
     }
 
-    fn subtract(mut self, vector: impl VectorProp) {
+    fn subtract(mut self, vector: impl Vector) {
         let [x, y] = vector.get2D();
         self.x -= x;
         self.y -= y;
@@ -52,6 +43,27 @@ pub struct Vec2 {
     pub y: f32,
 }
 
+impl Vec2 {
+    pub fn new(pos: [f32;2]) -> Self {
+        Vec2 {
+            x: pos[0],
+            y: pos[1]
+        }
+    }
+
+    pub fn output(self) -> V {
+        out(&self)
+    }
+
+    pub fn test(self) -> () {
+
+    }
+}
+
+fn out(V: &impl Vector) -> &impl Vector {
+    V
+}
+
 impl Default for Vec2 {
     fn default() -> Self {
         Self {
@@ -72,23 +84,15 @@ pub struct Vec3 {
     pub z: f32,
 }
 
-impl VectorProp for Vec3 {
-    fn new(pos: &[f32]) -> Self {
-        Self {
-            x: pos[0],
-            y: pos[1],
-            z: pos[2]
-        }
-    }
-
-    fn add(mut self, vector: impl VectorProp) {
+impl Vector for Vec3 {
+    fn add(mut self, vector: impl Vector) {
         let [x,y,z] = vector.get3D();
         self.x += x;
         self.y += y;
         self.z += z;
     }
 
-    fn subtract(mut self, vector: impl VectorProp) {
+    fn subtract(mut self, vector: impl Vector) {
         let [x,y,z] = vector.get3D();
         self.x -= x;
         self.y -= y;
@@ -112,9 +116,4 @@ impl Default for Vec3 {
             z: 0f32
         }
     }
-}
-
-/// Stores the Vector for the Entity.
-pub trait Vectors {
-    type Vector: VectorProp;
 }
