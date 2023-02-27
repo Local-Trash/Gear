@@ -4,21 +4,25 @@
 #![allow(non_snake_case)]
 #![allow(dead_code)]
 
-use std::{collections::HashSet, ops::Deref};
-use Math::*;
 pub use Log::*;
-use wgpu::{Backends, RenderPipeline};
-use winit::{window::{Window, WindowBuilder}, event_loop::{EventLoopBuilder, EventLoop}, dpi::{Size, PhysicalSize}};
 pub use wgpu;
 pub use winit;
+
+use std::{collections::HashSet, ops::Deref};
+use Math::*;
+use wgpu::{Backends, RenderPipeline};
+use winit::{window::{Window, WindowBuilder}, event_loop::{EventLoopBuilder, EventLoop}, dpi::{Size, PhysicalSize}};
 
 pub mod Math;
 pub mod Sprite;
 pub mod Log;
 mod shader;
 
+/// Decides the Dimseion of the game.
 pub enum Dimension {
+    /// Will make the game 2D
     TwoD,
+    /// Will make the game 3D
     ThreeD,
 }
 
@@ -35,10 +39,12 @@ pub struct Context {
 impl Context {
     /// Creates a new context.
     pub fn new() -> Self {
+        // Defines the Builders
         let event_loop: EventLoopBuilder<()> = EventLoopBuilder::new();
         let window: WindowBuilder = WindowBuilder::new()
             .with_resizable(false);
 
+        // Returns the builder and dim
         Self {
             event_loop,
             window,
@@ -65,7 +71,7 @@ impl Context {
     }
 
     /// Changes the Dimension of the engine
-    pub fn withdim(self, dim: Dimension) -> Self {
+    pub fn withDim(self, dim: Dimension) -> Self {
         Self {
             dim,
             event_loop: self.event_loop,
@@ -152,18 +158,20 @@ impl<'a> Engine<'a> {
         };
         surface.configure(&device, &config);
 
-        // takes the s
+        // takes the shader and makes a module
         let shader = device.create_shader_module(wgpu::ShaderModuleDescriptor {
             label: Some("Shader"),
             source: wgpu::ShaderSource::Wgsl(String::from(shader::SHADER).into()),
         });
 
+        // Makes the render pipeline
         let render_pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
             label: Some("Render Pipeline Layout"),
             bind_group_layouts: &[],
             push_constant_ranges: &[],
         });
 
+        // Makes the vertex render pipeline
         let vertex_pipeline = device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
             label: Some("Render Pipeline"),
             layout: Some(&render_pipeline_layout),
@@ -171,7 +179,7 @@ impl<'a> Engine<'a> {
                 module: &shader,
                 entry_point: "vertex_main",
                 buffers: &[],
-            },
+            }, // I'm not touching the rest of the struct
             fragment: Some(wgpu::FragmentState {
                 module: &shader,
                 entry_point: "vertex_main",
@@ -207,6 +215,7 @@ impl<'a> Engine<'a> {
             device,
             queue,
             config,
+            // Will hold may pipelines for rendering images and particles
             pipelines: vec![vertex_pipeline],
             update: Self::update,
             ctx: (window, eventLoop, context.dim),
@@ -215,6 +224,7 @@ impl<'a> Engine<'a> {
         }
     }
 
+    // Simpl eplace holder function for the new function
     fn update(_input: &HashSet<u32>, _entites: &mut Vec<Enity>) {
         log!(LogType::Warning, "No update Function was given");
     }
@@ -224,8 +234,10 @@ impl<'a> Engine<'a> {
         let mut inputMap: HashSet<u32> = HashSet::new();
 
         self.ctx.1.run(move |event, _, control_flow| {
+            // Makes it able to hold multiply inputs
             *control_flow = winit::event_loop::ControlFlow::Poll; 
             match event {
+                // Inserts the input into the inputMap
                 winit::event::Event::WindowEvent {
                     event: winit::event::WindowEvent::KeyboardInput { input, .. },
                     ..
@@ -236,7 +248,9 @@ impl<'a> Engine<'a> {
                         inputMap.remove(&input.scancode);
                     }
                 },
+                // Checks for a close request
                 winit::event::Event::WindowEvent { event: winit::event::WindowEvent::CloseRequested, .. } => *control_flow = winit::event_loop::ControlFlow::Exit,
+                // This is each frame
                 winit::event::Event::MainEventsCleared => {
                     todo!()
                 },
@@ -252,6 +266,7 @@ impl<'a> Engine<'a> {
 
     /// Inserts Enities into the game engine and then returns their id to be able to be used in the global update function.
     pub fn insertEnities(&mut self, enity: Enity) -> i32 {
+        // Genorates the id (plzs dont import the rand crate)
         let id = {
             let mut id = 1;
             for ent in &self.enities {
@@ -259,6 +274,7 @@ impl<'a> Engine<'a> {
             }
             id
         };
+        // pushes the input
         self.enities.push(enity);
         id
     }
@@ -266,7 +282,7 @@ impl<'a> Engine<'a> {
 
 /// Used for implemnting enities into the ecs
 pub struct Enity {
-    /// The Vector position
+    /// The Vector position. You can use what ever struct you want as long as it impl Vector
     pub pos: Box<dyn Vector>,
     /// Weather it should 
     pub active: bool,
@@ -279,6 +295,7 @@ pub struct Enity {
 }
 
 impl Enity {
+    /// Creates a Enity
     pub fn new() -> Self {
         Self {
             pos: Box::new(Vec2::new([0f32,0f32])),
@@ -289,15 +306,20 @@ impl Enity {
         }
     }
 
+    // Place holder update function for the new function
     fn update(_: &HashSet<u32>, _: &mut Enity) {}
 
-    pub fn insertUpdate() {
-
+    /// Inserts a new update method for the enity
+    pub fn insertUpdate(&mut self, func: fn(&HashSet<u32>, &mut Enity)) {
+        self.update = func;
     }
 }
 
+// Tests
 #[cfg(test)]
 mod tests {
+
+    // Tests for the log mod
     mod log {
         use crate::{log, LogType};
 
@@ -319,9 +341,11 @@ mod tests {
         }
     }
 
+    // Tests for the enity struct
     mod enity {
         use crate::Enity;
 
+        // tests the Creation of the struct
         #[test]
         fn creation() {
             Enity::new();
