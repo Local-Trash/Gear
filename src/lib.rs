@@ -75,21 +75,21 @@ impl Context {
 }
 
 /// This is the main Engine. This holds all of the backend variables that are required when rendering to a screen.
-pub struct Engine<V> where V: Vector {
+pub struct Engine {
     surface: wgpu::Surface,
     device: wgpu::Device,
     queue: wgpu::Queue,
     config: wgpu::SurfaceConfiguration,
     size: winit::dpi::PhysicalSize<u32>,
     pipelines: Vec<RenderPipeline>,
-    update: fn(&HashSet<u32>, &mut Vec<Enity<V>>),
+    update: fn(&HashSet<u32>, &mut Vec<Enity>),
     ctx: (Window, EventLoop<()>, Dimension),
-    enities: Vec<Enity<V>>
+    enities: Vec<Enity>
 }
 
-impl<V> Engine<V> where V: Vector + 'static {
+impl Engine {
     /// Creates a engine. Give Context to the engine.
-    pub async fn new(mut context: Context) -> Engine<V> {
+    pub async fn new(mut context: Context) -> Engine {
         // This builds the event_loop and window for the rest of the function and engine.
         let eventLoop: EventLoop<()> = context.event_loop.build();
         let window: Window = context.window.build(eventLoop.deref()).unwrap();
@@ -211,18 +211,19 @@ impl<V> Engine<V> where V: Vector + 'static {
         }
     }
 
-    fn update(_input: &HashSet<u32>, _entites: &mut Vec<Enity<V>>) {
+    fn update(_input: &HashSet<u32>, _entites: &mut Vec<Enity>) {
         log!(LogType::Warning, "No update Function was given");
     }
 
     /// Runs the Engine.
-    pub fn run(self) {
+    pub fn run(mut self) {
         let mut inputMap: HashSet<u32> = HashSet::new();
-        let mut updates: Vec<(fn(&HashSet<u32>, &mut Enity<V>), Enity<V>)> = Vec::new();
-        let mut ecs: &Engine<V> = &self; 
+        let mut updates: &Vec<(&fn(&HashSet<u32>, &mut Enity), &Enity)> = &Vec::new();
+        
+        let mut ecs = &self.enities; 
 
         self.ctx.1.run(move |event, _, control_flow| {
-            *control_flow = winit::event_loop::ControlFlow::Poll;
+            *control_flow = winit::event_loop::ControlFlow::Poll; 
             match event {
                 winit::event::Event::WindowEvent {
                     event: winit::event::WindowEvent::KeyboardInput { input, .. },
@@ -236,9 +237,7 @@ impl<V> Engine<V> where V: Vector + 'static {
                 },
                 winit::event::Event::WindowEvent { event: winit::event::WindowEvent::CloseRequested, .. } => *control_flow = winit::event_loop::ControlFlow::Exit,
                 winit::event::Event::MainEventsCleared => {
-                    for (func, en) in &mut updates {
-                        (func)(&inputMap, en);
-                    }
+                    ecs;
                 },
                 _ => {},
             }
@@ -246,12 +245,12 @@ impl<V> Engine<V> where V: Vector + 'static {
     }
 
     /// Inserts the given update function into the Engine. The update replaces the old one and is the global one.
-    pub fn insertUpdate(mut self, func: fn(&HashSet<u32>, &mut Vec<Enity<V>>)) {
+    pub fn insertUpdate(mut self, func: fn(&HashSet<u32>, &mut Vec<Enity>)) {
         self.update = func;
     }
 
     /// Inserts Enities into the game engine and then returns their id to be able to be used in the global update function.
-    pub fn insertEnities(&mut self, enity: Enity<V>) -> i32 {
+    pub fn insertEnities(&mut self, enity: Enity) -> i32 {
         let id = {
             let mut id = 1;
             for ent in &self.enities {
@@ -265,23 +264,23 @@ impl<V> Engine<V> where V: Vector + 'static {
 }
 
 /// Used for implemnting enities into the ecs
-pub struct Enity<V> where V: Vector {
+pub struct Enity {
     /// The Vector position
-    pub pos: V,
+    pub pos: Box<dyn Vector>,
     /// Weather it should 
     pub active: bool,
     /// The update function of the Enity 
-    pub update: fn(&HashSet<u32>, Self),
+    pub update: fn(&HashSet<u32>, &mut Enity),
     /// This is a tupple that holds the did components of the Enity
     pub traits: (),
     /// The objects id
     pub id: i32,
 }
 
-impl<V> Enity<V> where V: Vector {
+impl Enity {
     pub fn new() -> Self {
         Self {
-            pos: Vec2::new([0f32,0f32]).output(),
+            pos: Box::new(Vec2::new([0f32,0f32])),
             active: true,
             update: Enity::update,
             traits: todo!(),
@@ -289,7 +288,7 @@ impl<V> Enity<V> where V: Vector {
         }
     }
 
-    fn update(_: &HashSet<u32>, _: Self) {}
+    fn update(_: &HashSet<u32>, _: &mut Enity) {}
 
     pub fn insertUpdate() {
 

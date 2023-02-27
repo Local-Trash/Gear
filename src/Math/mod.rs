@@ -1,35 +1,20 @@
 mod vertex;
 
 /// Used for using for making Vectors
-pub trait Vector : Copy + Clone {
-    /// Adds two Vector together.
-    fn add(self, vector: impl Vector);
-    /// Subtracts two Vector together.
-    fn subtract(self, vector: impl Vector);
+pub trait Vector {
     /// Gets the 2d position of the Vector
-    fn get2D(self) -> [f32; 2];
+    fn get2D(&self) -> [f32; 2];
     /// Gets the 3d position of the Vector
-    fn get3D(self) -> [f32; 3];
+    fn get3D(&self) -> [f32; 3];
 }
 
-impl Vector for Vec2 {
-    fn add(mut self, vector: impl Vector) {
-        let [x, y] = vector.get2D();
-        self.x += x;
-        self.y += y;
-    }
+impl<'a> Vector for Vec2 {
 
-    fn subtract(mut self, vector: impl Vector) {
-        let [x, y] = vector.get2D();
-        self.x -= x;
-        self.y -= y;
-    }
-
-    fn get2D(self) -> [f32; 2] {
+    fn get2D(&self) -> [f32; 2] {
         [self.x, self.y]
     }
 
-    fn get3D(self) -> [f32; 3] {
+    fn get3D(&self) -> [f32; 3] {
         [self.x, self.y, 0f32]
     }
 }
@@ -50,18 +35,6 @@ impl Vec2 {
             y: pos[1]
         }
     }
-
-    pub fn output(self) -> V {
-        out(&self)
-    }
-
-    pub fn test(self) -> () {
-
-    }
-}
-
-fn out(V: &impl Vector) -> &impl Vector {
-    V
 }
 
 impl Default for Vec2 {
@@ -85,25 +58,12 @@ pub struct Vec3 {
 }
 
 impl Vector for Vec3 {
-    fn add(mut self, vector: impl Vector) {
-        let [x,y,z] = vector.get3D();
-        self.x += x;
-        self.y += y;
-        self.z += z;
-    }
-
-    fn subtract(mut self, vector: impl Vector) {
-        let [x,y,z] = vector.get3D();
-        self.x -= x;
-        self.y -= y;
-        self.z -= z;
-    }
     
-    fn get2D(self) -> [f32; 2] {
+    fn get2D(&self) -> [f32; 2] {
         [self.x, self.y]
     }
 
-    fn get3D(self) -> [f32; 3] {
+    fn get3D(&self) -> [f32; 3] {
         [self.x, self.y, self.z]
     }
 }
