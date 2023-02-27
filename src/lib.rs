@@ -75,7 +75,7 @@ impl Context {
 }
 
 /// This is the main Engine. This holds all of the backend variables that are required when rendering to a screen.
-pub struct Engine {
+pub struct Engine<'a> {
     surface: wgpu::Surface,
     device: wgpu::Device,
     queue: wgpu::Queue,
@@ -84,12 +84,13 @@ pub struct Engine {
     pipelines: Vec<RenderPipeline>,
     update: fn(&HashSet<u32>, &mut Vec<Enity>),
     ctx: (Window, EventLoop<()>, Dimension),
-    enities: Vec<Enity>
+    enities: Vec<Enity>,
+    updateFuncs: Vec<(&'a fn(&HashSet<u32>, &mut Enity), &'a Enity)>,
 }
 
-impl Engine {
+impl<'a> Engine<'a> {
     /// Creates a engine. Give Context to the engine.
-    pub async fn new(mut context: Context) -> Engine {
+    pub async fn new(mut context: Context) -> Engine<'a> {
         // This builds the event_loop and window for the rest of the function and engine.
         let eventLoop: EventLoop<()> = context.event_loop.build();
         let window: Window = context.window.build(eventLoop.deref()).unwrap();
@@ -122,7 +123,7 @@ impl Engine {
             .await {
                 Some(v) => v,
                 None => panic!("Failed to find an appropriate adapter."),
-        };
+            };
 
         // Creates a device and queue
         let (device, queue) = match adapter
@@ -198,6 +199,8 @@ impl Engine {
             multiview: None,
         });
 
+        log!(LogType::Debug, "Engine was created successfully");
+
         Self {
             size,
             surface,
@@ -207,7 +210,8 @@ impl Engine {
             pipelines: vec![vertex_pipeline],
             update: Self::update,
             ctx: (window, eventLoop, context.dim),
-            enities: vec![]
+            enities: vec![],
+            updateFuncs: vec![],
         }
     }
 
@@ -216,11 +220,8 @@ impl Engine {
     }
 
     /// Runs the Engine.
-    pub fn run(mut self) {
+    pub fn run(self) {
         let mut inputMap: HashSet<u32> = HashSet::new();
-        let mut updates: &Vec<(&fn(&HashSet<u32>, &mut Enity), &Enity)> = &Vec::new();
-        
-        let mut ecs = &self.enities; 
 
         self.ctx.1.run(move |event, _, control_flow| {
             *control_flow = winit::event_loop::ControlFlow::Poll; 
@@ -237,7 +238,7 @@ impl Engine {
                 },
                 winit::event::Event::WindowEvent { event: winit::event::WindowEvent::CloseRequested, .. } => *control_flow = winit::event_loop::ControlFlow::Exit,
                 winit::event::Event::MainEventsCleared => {
-                    ecs;
+                    todo!()
                 },
                 _ => {},
             }
@@ -245,7 +246,7 @@ impl Engine {
     }
 
     /// Inserts the given update function into the Engine. The update replaces the old one and is the global one.
-    pub fn insertUpdate(mut self, func: fn(&HashSet<u32>, &mut Vec<Enity>)) {
+    pub fn insertUpdate(&mut self, func: fn(&HashSet<u32>, &mut Vec<Enity>)) {
         self.update = func;
     }
 
@@ -283,8 +284,8 @@ impl Enity {
             pos: Box::new(Vec2::new([0f32,0f32])),
             active: true,
             update: Enity::update,
-            traits: todo!(),
-            id: 0i32, 
+            traits: (),
+            id: 0, 
         }
     }
 
