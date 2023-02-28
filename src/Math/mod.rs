@@ -8,7 +8,7 @@ pub trait Vector {
     fn get3D(&self) -> [f32; 3];
 }
 
-impl<'a> Vector for Vec2 {
+impl Vector for Vec2 {
 
     fn get2D(&self) -> [f32; 2] {
         [self.x, self.y]
@@ -29,6 +29,7 @@ pub struct Vec2 {
 }
 
 impl Vec2 {
+    // Creates the Vec2
     pub fn new(pos: [f32;2]) -> Self {
         Vec2 {
             x: pos[0],
@@ -37,12 +38,10 @@ impl Vec2 {
     }
 }
 
+// Simple calls
 impl Default for Vec2 {
     fn default() -> Self {
-        Self {
-            x: 0f32,
-            y: 0f32
-        }
+        Vec2::new([0f32, 0f32])
     }
 }
 
@@ -58,22 +57,30 @@ pub struct Vec3 {
 }
 
 impl Vector for Vec3 {
-    
+    // returns the array
     fn get2D(&self) -> [f32; 2] {
         [self.x, self.y]
     }
 
+    // pretty simple impl
     fn get3D(&self) -> [f32; 3] {
         [self.x, self.y, self.z]
     }
 }
 
+impl Vec3 {
+    // Creates the Vec3
+    pub fn new(pos: [f32;3]) -> Self {
+        Self {
+            x: pos[0],
+            y: pos[1],
+            z: pos[2]
+        }
+    }
+}
+
 impl Default for Vec3 {
     fn default() -> Self {
-        Self {
-            x: 0f32,
-            y: 0f32,
-            z: 0f32
-        }
+        Vec3::new([0f32,0f32,0f32])
     }
 }
