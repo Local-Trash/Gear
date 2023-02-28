@@ -1,4 +1,4 @@
-mod vertex;
+pub mod vertex;
 
 /// Used for using for making Vectors
 pub trait Vector {
