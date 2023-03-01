@@ -39,7 +39,7 @@ macro_rules! log {
     };
 }
 
-#[derive(Debug, )]
+#[derive(Debug)]
 pub enum LogType {
     Warning,
     Debug,

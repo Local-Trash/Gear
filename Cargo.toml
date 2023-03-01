@@ -27,3 +27,7 @@ features = ["png"]
 fullLog = ["debug", "warning"]
 debug = []
 warning = []
+
+[[bin]]
+name = "1-Window"
+path = "examples/"
