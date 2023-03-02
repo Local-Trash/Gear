@@ -31,5 +31,5 @@ debug = []
 warning = []
 
 [[example]]
-name = "1-Window"
-path = "examples/"
+name = "1_window"
+path = "examples/1-Window.rs"

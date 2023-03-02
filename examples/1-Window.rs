@@ -6,7 +6,10 @@ fn main() {
     let ctx = Context::new()
         .withTitle("Window");
 
-    let engine: Engine = block_on(Engine::new(ctx));
+    let mut engine = block_on(Engine::new(ctx));
+    engine.insertUpdate(|_,_| {
+        println!("WIndow is running");
+    });
 
     engine.run();
 }
