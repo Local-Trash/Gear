@@ -224,7 +224,7 @@ impl<'a> Engine<'a> {
         }
     }
 
-    // Simpl eplace holder function for the new function
+    // Simple eplace holder function for the new function
     fn update(_input: &HashSet<u32>, _entites: &mut Vec<Enity>) {
         log!(LogType::Warning, "No update Function was given");
     }
@@ -252,7 +252,7 @@ impl<'a> Engine<'a> {
                 winit::event::Event::WindowEvent { event: winit::event::WindowEvent::CloseRequested, .. } => *control_flow = winit::event_loop::ControlFlow::Exit,
                 // This is each frame
                 winit::event::Event::MainEventsCleared => {
-                    todo!()
+                    self;
                 },
                 _ => {},
             }
