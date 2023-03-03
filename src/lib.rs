@@ -62,7 +62,7 @@ impl Context {
     }
 
     /// Changes the title of the window
-    pub fn withTitle(self, title: &str) -> Self {
+    pub fn withTitle<S: Into<String>>(self, title: S) -> Self {
         Self {
             window: self.window.with_title(title),
             event_loop: self.event_loop,
