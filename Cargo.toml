@@ -11,25 +11,7 @@ readme = "README.md"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-winit = "0.28.1"
-wgpu = "0.15"
-bytemuck = { version = "1.12", features = [ "derive" ] }
-chrono = { version = "*", default-features = false, features = ["clock"]}
-colored = "2.0.0"
+godot = { git = "https://github.com/godot-rust/gdextension", branch = "master" }
 
-[dev-dependencies]
-pollster = "*"
-
-[dependencies.image]
-version = "0.24"
-default-features = false
-features = ["png"]
-
-[features]
-fullLog = ["debug", "warning"]
-debug = []
-warning = []
-
-[[example]]
-name = "1_window"
-path = "examples/1-Window.rs"
+[lib]
+crate-type = ["cdylib"]
