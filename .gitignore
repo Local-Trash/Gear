@@ -1,9 +1,5 @@
-/target
-/Cargo.lock
-/Godot.x86_64
+/libgear/target
+/libgear/Cargo.lock
 
-# Added by cargo
-#
-# already existing elements were commented out
-
-#/target
+/examples/new_window/Cargo.lock
+/examples/new_window/target
