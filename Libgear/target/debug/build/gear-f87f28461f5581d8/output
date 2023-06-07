@@ -1,0 +1,2 @@
+cargo:rustc-link-search=native=/workspaces/Gear/Libgear/target/debug/build/gear-f87f28461f5581d8/out
+cargo:rustc-link-lib=dylib=glfw3

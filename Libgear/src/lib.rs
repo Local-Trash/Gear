@@ -50,8 +50,7 @@ extern "C" fn run(
         };
 
         let window = glfwCreateWindow(500, 500, title, null_mut(), null_mut());
-
-        let glviewport = window.
+        gl::load_with(|s| window.get_proc_address(s) as *const _);
 
         if window.is_null() {
             println!("Failed to create window. Error Code: 2");
@@ -59,7 +58,7 @@ extern "C" fn run(
             return;
         }
 
-        glViewport(100, 100, 500, 500);
+        //GLViewport(100, 100, 500, 500);
 
         glfwSetFramebufferSizeCallback(window, frameBufferSizeCallBack);
 
@@ -69,9 +68,9 @@ extern "C" fn run(
                 glfwSetWindowShouldClose(window, True);
             }
 
-            glClearColor(0.2, 0.3, 0.3, 1.0);
+            //glClearColor(0.2, 0.3, 0.3, 1.0);
 
-            glClear(glColorBufferBit);
+            //glClear(glColorBufferBit);
 
             glfwSwapBuffers(window);
             glfwPollEvents(); 
@@ -83,7 +82,7 @@ extern "C" fn run(
 }
 
 extern "C" fn frameBufferSizeCallBack(window: *mut GLFWwindow, width: GLint, height: GLint) {
-    unsafe { glViewport(0, 0, width, height) };
+    unsafe { //glViewport(0, 0, width, height) };
 }
 
 #[allow(missing_copy_implementations)]
@@ -98,4 +97,8 @@ type GLint = c_int;
 type GLcampf = f32;
 type GLbitfield = c_uint;
 type GLFWframebuffersizefun = extern "C" fn(*mut GLFWwindow, GLint, GLint);
-type GLFWglproc = *const c_void;
+//type GLFWglproc = *const c_void;
+
+mod gl {
+    include!(concat!(env!("OUT_DIR"), "/bindings.rs"));
+}
