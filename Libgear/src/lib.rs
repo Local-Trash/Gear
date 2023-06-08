@@ -43,7 +43,7 @@ extern "C" {
 }
 
 #[allow(non_upper_case_globals)]
-static mut viewport: Option<Viewport> = None;
+static mut glfunctions: Option<GLFunctions> = None;
 
 #[no_mangle]
 extern "C" fn run(
@@ -66,7 +66,7 @@ extern "C" fn run(
 
         glfwMakeContextCurrent(window);
 
-        viewport = Some(Viewport::new());
+        glfunctions = Some(GLFunctions::new());
 
         glfwSetFramebufferSizeCallback(window, frameBufferSizeCallBack);
 
@@ -83,8 +83,10 @@ extern "C" fn run(
             }
 
             //glClearColor(0.2, 0.3, 0.3, 1.0);
+            glfunctions.as_ref().unwrap().clearcolor.run(0.2, 0.3, 0.3, 1.0);
 
             //glClear(glColorBufferBit);
+            glfunctions.as_ref().unwrap().clear.run(glColorBufferBit);
 
             glfwSwapBuffers(window);
             glfwPollEvents(); 
@@ -97,6 +99,22 @@ extern "C" fn run(
 
 extern "C" fn frameBufferSizeCallBack(window: *mut GLFWwindow, width: GLint, height: GLint) {
     unsafe {
-        viewport.as_ref().unwrap().run(0, 0, width, height);
+        glfunctions.as_ref().unwrap().viewport.run(0, 0, width, height);
+    }
+}
+
+struct GLFunctions {
+    viewport: Viewport,
+    clearcolor: ClearColor,
+    clear: Clear
+}
+
+impl GLFunctions {
+    fn new() -> Self {
+        GLFunctions { 
+            viewport: Viewport::new(), 
+            clearcolor: ClearColor::new(),
+            clear: Clear::new()
+        }
     }
 }

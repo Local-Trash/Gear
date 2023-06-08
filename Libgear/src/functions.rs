@@ -29,7 +29,7 @@ impl Viewport {
     }
 }
 
-struct ClearColor(extern "system" fn(GLcampf, GLcampf, GLcampf, GLcampf));
+pub struct ClearColor(extern "system" fn(GLcampf, GLcampf, GLcampf, GLcampf));
 
 impl ClearColor {
     pub fn new() -> ClearColor {
@@ -43,9 +43,11 @@ impl ClearColor {
                     GLcampf, 
                     GLcampf, 
                     GLcampf
-                ) -> ()>(
-                    glfwGetProcAddress(procname.as_ptr())
-                )
+                ) -> ()
+            >
+            (
+                glfwGetProcAddress(procname.as_ptr())
+            )
         };
 
         ClearColor(ptr)
@@ -56,5 +58,31 @@ impl ClearColor {
             println!("Clear Color parameters were not under 1")
         }
         self.0(red, green, blue, alpha);
+    }
+}
+
+pub struct Clear(extern "system" fn(GLbitfield));
+
+impl Clear {
+    pub fn new() -> Self {
+        let procname = CString::new("glClear").unwrap();
+
+        let ptr = unsafe { 
+            transmute::<
+                *const c_void, 
+                extern "system" fn(
+                    GLbitfield
+                ) -> ()
+            >
+            (
+                glfwGetProcAddress(procname.as_ptr())
+            )
+        };
+
+        Self(ptr)
+    }
+
+    pub fn run(&self, mask: GLbitfield) {
+        self.0(mask);
     }
 }
