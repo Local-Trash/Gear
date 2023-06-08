@@ -1,6 +1,7 @@
-/workspaces/Gear/Libgear/target/debug/deps/libgear.so: src/lib.rs src/cosnts.rs
+C:\Users\tqdag\Desktop\Projects\Gear\libgear\target\debug\deps\gear.dll: src\lib.rs src\types.rs src\functions.rs
 
-/workspaces/Gear/Libgear/target/debug/deps/gear.d: src/lib.rs src/cosnts.rs
+C:\Users\tqdag\Desktop\Projects\Gear\libgear\target\debug\deps\gear.d: src\lib.rs src\types.rs src\functions.rs
 
-src/lib.rs:
-src/cosnts.rs:
+src\lib.rs:
+src\types.rs:
+src\functions.rs:

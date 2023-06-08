@@ -2,8 +2,10 @@
 use core::panic;
 use std::{ffi::*, ptr::null_mut};
 
-mod cosnts;
-use cosnts::*;
+mod types;
+mod functions;
+use functions::*;
+use types::*;
 
 extern "C" {
     fn glfwInit() -> c_int;
@@ -40,6 +42,9 @@ extern "C" {
     fn glfwGetProcAddress(procname: *const c_char) -> GLFWglproc;
 }
 
+#[allow(non_upper_case_globals)]
+static mut viewport: Option<Viewport> = None;
+
 #[no_mangle]
 extern "C" fn run(
     title: *const c_char
@@ -50,7 +55,8 @@ extern "C" fn run(
         };
 
         let window = glfwCreateWindow(500, 500, title, null_mut(), null_mut());
-        gl::load_with(|s| window.get_proc_address(s) as *const _);
+
+        println!("{:?}", &CStr::from_ptr(title).to_str().unwrap());
 
         if window.is_null() {
             println!("Failed to create window. Error Code: 2");
@@ -58,9 +64,17 @@ extern "C" fn run(
             return;
         }
 
-        //GLViewport(100, 100, 500, 500);
+        glfwMakeContextCurrent(window);
+
+        viewport = Some(Viewport::new());
 
         glfwSetFramebufferSizeCallback(window, frameBufferSizeCallBack);
+
+        let vertex: [f32; 9] = [
+            -0.5, -0.5, 0.,
+            0.5, 0.5, 0.,
+            0., 0.5, 0.
+        ];
 
         while glfwWindowShouldClose(window) == 0 {
 
@@ -82,23 +96,7 @@ extern "C" fn run(
 }
 
 extern "C" fn frameBufferSizeCallBack(window: *mut GLFWwindow, width: GLint, height: GLint) {
-    unsafe { //glViewport(0, 0, width, height) };
-}
-
-#[allow(missing_copy_implementations)]
-#[derive(Debug)]
-pub enum GLFWwindow {}
-
-#[allow(missing_copy_implementations)]
-#[derive(Debug)]
-pub enum GLFWmonitor {}
-
-type GLint = c_int;
-type GLcampf = f32;
-type GLbitfield = c_uint;
-type GLFWframebuffersizefun = extern "C" fn(*mut GLFWwindow, GLint, GLint);
-//type GLFWglproc = *const c_void;
-
-mod gl {
-    include!(concat!(env!("OUT_DIR"), "/bindings.rs"));
+    unsafe {
+        viewport.as_ref().unwrap().run(0, 0, width, height);
+    }
 }
