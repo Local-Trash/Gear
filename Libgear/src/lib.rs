@@ -1,9 +1,10 @@
 #![allow(non_snake_case)]
 use core::panic;
-use std::{ffi::*, ptr::null_mut};
+use std::{ffi::*, ptr::{null_mut, null}};
 
 mod types;
 mod functions;
+mod shader;
 use functions::*;
 use types::*;
 
@@ -67,10 +68,11 @@ extern "C" fn run(
         glfwMakeContextCurrent(window);
 
         glfunctions = Some(GLFunctions::new());
+        let vertexShadersource = CString::new(shader::vertex).unwrap();
 
         glfwSetFramebufferSizeCallback(window, frameBufferSizeCallBack);
 
-        let vertex: [f32; 9] = [
+        let verteices: [f32; 9] = [
             -0.5, -0.5, 0.,
             0.5, 0.5, 0.,
             0., 0.5, 0.
@@ -82,10 +84,19 @@ extern "C" fn run(
                 glfwSetWindowShouldClose(window, True);
             }
 
-            //glClearColor(0.2, 0.3, 0.3, 1.0);
             glfunctions.as_ref().unwrap().clearcolor.run(0.2, 0.3, 0.3, 1.0);
 
-            //glClear(glColorBufferBit);
+            let mut VBO: GLuint = 0;
+            glfunctions.as_ref().unwrap().genbuffers.run(1, VBO as *mut GLuint);
+            glfunctions.as_ref().unwrap().bindbuffers.run(glArrayBuffer, VBO);
+            glfunctions.as_ref().unwrap().bufferdata.run(
+                glArrayBuffer, 
+                verteices.len() as GLsizeiptr, &verteices[0] as *const f32 as *const c_void, 
+                glStaticDraw
+            );
+            let vertexShader = glfunctions.as_ref().unwrap().createShader.run(glVertexShader);
+            glfunctions.as_ref().unwrap().shaderSource.run(vertexShader, 1, vertexShadersource.as_ptr() as *mut GLchar, null::<GLint>() as *mut _);
+
             glfunctions.as_ref().unwrap().clear.run(glColorBufferBit);
 
             glfwSwapBuffers(window);
@@ -106,7 +117,12 @@ extern "C" fn frameBufferSizeCallBack(window: *mut GLFWwindow, width: GLint, hei
 struct GLFunctions {
     viewport: Viewport,
     clearcolor: ClearColor,
-    clear: Clear
+    clear: Clear,
+    genbuffers: GenBuffers,
+    bindbuffers: BindBuffer,
+    bufferdata: BufferData,
+    createShader: CreateShader,
+    shaderSource: ShaderSource,
 }
 
 impl GLFunctions {
@@ -114,7 +130,12 @@ impl GLFunctions {
         GLFunctions { 
             viewport: Viewport::new(), 
             clearcolor: ClearColor::new(),
-            clear: Clear::new()
+            clear: Clear::new(),
+            genbuffers: GenBuffers::new(),
+            bindbuffers: BindBuffer::new(),
+            bufferdata: BufferData::new(),
+            createShader: CreateShader::new(),
+            shaderSource: ShaderSource::new()
         }
     }
 }
