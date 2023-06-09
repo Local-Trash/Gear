@@ -240,3 +240,29 @@ impl ShaderSource {
         self.0(shader, count, string, length);
     }
 }
+
+pub struct CompileShader(extern "system" fn(GLuint));
+
+impl CompileShader {
+    pub fn new() -> Self {
+        let procname = CString::new("glCompileShader").unwrap();
+
+        let ptr = unsafe { 
+            transmute::<
+                *const c_void, 
+                extern "system" fn(
+                    GLuint
+                ) -> ()
+            >
+            (
+                glfwGetProcAddress(procname.as_ptr())
+            )
+        };
+
+        Self(ptr)
+    }
+
+    pub fn run(&self, shader: GLuint) {
+        self.0(shader);
+    }
+}

@@ -95,7 +95,13 @@ extern "C" fn run(
                 glStaticDraw
             );
             let vertexShader = glfunctions.as_ref().unwrap().createShader.run(glVertexShader);
-            glfunctions.as_ref().unwrap().shaderSource.run(vertexShader, 1, vertexShadersource.as_ptr() as *mut GLchar, null::<GLint>() as *mut _);
+            glfunctions.as_ref().unwrap().shaderSource.run(
+                vertexShader, 
+                1, 
+                vertexShadersource.as_ptr() as *mut GLchar, 
+                null::<GLint>() as *mut _
+            );
+            glfunctions.as_ref().unwrap().compileShader.run(vertexShader);
 
             glfunctions.as_ref().unwrap().clear.run(glColorBufferBit);
 
@@ -123,6 +129,7 @@ struct GLFunctions {
     bufferdata: BufferData,
     createShader: CreateShader,
     shaderSource: ShaderSource,
+    compileShader: CompileShader
 }
 
 impl GLFunctions {
@@ -135,7 +142,8 @@ impl GLFunctions {
             bindbuffers: BindBuffer::new(),
             bufferdata: BufferData::new(),
             createShader: CreateShader::new(),
-            shaderSource: ShaderSource::new()
+            shaderSource: ShaderSource::new(),
+            compileShader: CompileShader::new()
         }
     }
 }
